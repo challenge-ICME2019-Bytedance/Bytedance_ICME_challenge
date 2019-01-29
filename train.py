@@ -1,8 +1,8 @@
-import tensorflow as tf
 import os
-from utils import get_dataset_path_list
-from model_args import init_model_args
-from model import RecommendModelHandler
+import tensorflow as tf
+from utils.utils import get_dataset_path_list
+from common.model_args import init_model_args
+from models.model import RecommendModelHandler
 
 
 def main():
@@ -35,7 +35,9 @@ def main():
   print "batch size: {}".format(batch_size)
   print "embedding size: {}".format(embedding_size)
 
-  task=args.task
+  task = args.task
+  track = args.track
+  print "track: {}, task: {}".format(track, task)
 
 
   model = RecommendModelHandler(
@@ -46,7 +48,9 @@ def main():
       optimizer=optimizer,
       batch_size= batch_size,
       embedding_size=embedding_size,
-      learning_rate=args.lr )
+      task=task,
+      track=track,
+      learning_rate=args.lr)
 
   model.train()
 

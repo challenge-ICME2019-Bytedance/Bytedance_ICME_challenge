@@ -18,6 +18,9 @@ optimizer=$6
 lr=$7
 
 task=$8
+track=$9
+echo "task: " $task
+echo "track: " $track
 
 mkdir ${save_model_dir};
 
@@ -28,6 +31,6 @@ python train.py \
   --batch_size $batch_size \
   --embedding_size $embedding_size \
   --lr $lr \
-  --task ${task} \
-
+  --task $task \
+  --track $track \
   --optimizer $optimizer

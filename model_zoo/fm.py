@@ -1,13 +1,14 @@
 
 import tensorflow as tf
 
-class TFModelParams(object):
+class FMModelParams(object):
+  """ class for initializing weights """
   def __init__(self, feature_size, embedding_size):
     self._feature_size = feature_size
     self._embedding_size = embedding_size
 
-  def _initialize_weights(self):
-    """ init tf weights
+  def initialize_weights(self):
+    """ init fm  weights
     Returns
     weights:
       feature_embeddings:  vi, vj second order params
@@ -35,8 +36,8 @@ class TFModelParams(object):
         shape=[1])
     return weights
 
-class TFRecommendModels(object):
-  """ class which provides some models for recommendation"""
+class FMModel(object):
+  """ FM implementation """
 
   @staticmethod
   def fm_model_fn(features, labels, mode, params):
@@ -58,8 +59,8 @@ class TFRecommendModels(object):
     feature_values = tf.reshape(feature_values, shape=[batch_size, field_size, 1])
 
     # tf fm weights
-    tf_model_params = TFModelParams(feature_size, embedding_size)
-    weights = tf_model_params._initialize_weights()
+    tf_model_params = FMModelParams(feature_size, embedding_size)
+    weights = tf_model_params.initialize_weights()
     embeddings = tf.nn.embedding_lookup(
         weights["feature_embeddings"],
         feature_idx
@@ -100,9 +101,10 @@ class TFRecommendModels(object):
     loss = sigmoid_loss
 
     #train op
-    optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
     if optimizer_used == 'adagrad':
-      optimizer = tf.train.AdagradOptimizer(learning_rate=learning_rate, initial_accumulator_value=1e-8)
+      optimizer = tf.train.AdagradOptimizer(
+          learning_rate=learning_rate,
+          initial_accumulator_value=1e-8)
     elif optimizer_used == 'adam':
       optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
     else:
@@ -116,11 +118,10 @@ class TFRecommendModels(object):
         "auc": tf.metrics.auc(labels, predicts)
         }
     predictions = {"prob": predicts}
-    #logging_hook = tf.train.LoggingTensorHook({"loss" : loss, "auc" : tf.metrics.auc(labels, predicts)} , every_n_iter=10)
-    return tf.estimator.EstimatorSpec(
-      mode=tf.estimator.ModeKeys.TRAIN,
-      predictions=predicts,
-      loss=loss,
-      eval_metric_ops=eval_metric_ops,
-      train_op=train_op)
 
+    return tf.estimator.EstimatorSpec(
+        mode=tf.estimator.ModeKeys.TRAIN,
+        predictions=predicts,
+        loss=loss,
+        eval_metric_ops=eval_metric_ops,
+        train_op=train_op)
